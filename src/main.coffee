@@ -43,6 +43,6 @@ window.main = () ->
   )
   processedCommands.forEach((command) -> 
     temp = crateStacks[command.from].splice(0,command.move)
-    crateStacks[command.to] = [...temp.reverse(),...crateStacks[command.to]]
+    crateStacks[command.to] = [...temp,...crateStacks[command.to]]
   )
   toOutput(crateStacks.map((cur) -> cur[0]).join(""))  
