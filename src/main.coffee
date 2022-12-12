@@ -2,7 +2,8 @@ import Terminal from './classes/terminal.coffee'
 
 title = 'Advent of code'
 
-`const MAX_FOLDER_SIZE = 100000`
+`const TOTAL_SPACE = 70000000`
+`const NEEDED_SPACE = 30000000`
 
 document.addEventListener("load",() ->
   window.input = document.getElementById("input")
@@ -15,8 +16,6 @@ window.toOutput = (str) ->
 window.processDirectory = (acc,cur) ->
   if cur.constructor.name isnt 'Directory'
     return acc
-  if cur.size > MAX_FOLDER_SIZE
-    return acc.concat(cur.children.reduce(processDirectory,[]))
   return acc.concat(cur).concat(cur.children.reduce(processDirectory,[]))
 
 window.main = () ->
@@ -29,8 +28,18 @@ window.main = () ->
     terminal.processLine(cur)
   
   terminal.goHome()
+
+  curSpace = TOTAL_SPACE - terminal.curDir.size
   
-  toOutput Object.values(terminal.dirs).reduce(processDirectory,[]).reduce(((acc,cur) -> acc + cur.size),0)
+  allDirs = Object.values(terminal.dirs).reduce(processDirectory,[]).sort((a,b) -> b.size - a.size)
+
+  console.log curSpace
+  console.log allDirs
+  i = 0;
+  while (allDirs[i + 1].size + curSpace) > NEEDED_SPACE
+    i++
+  toOutput allDirs[i].size
+
 
     
 
