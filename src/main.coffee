@@ -20,11 +20,11 @@ window.main = () ->
   )
   total = cleaningLists.reduce(((acc,cur) -> 
     [bigset,smallset] = cur
-    innerStart = smallset.start >= bigset.start
-    innerEnd = bigset.end >= smallset.end
-    if(innerStart and innerEnd)
-      return acc+1 
-    else 
+    outerLeft = bigset.start > smallset.end
+    outerRight = bigset.end < smallset.start
+    if(outerLeft or outerRight)
       return acc
+    else 
+      return acc+1
   ),0)
   toOutput(total)
