@@ -11,9 +11,9 @@ window.toOutput = (str) ->
 window.main = () ->
   console.clear()
   inputValue = input.value.trim()
-  for i in [3...inputValue.length]
+  for i in [13...inputValue.length]
     ###*@type String###
-    cur = inputValue[i-3..i]
+    cur = inputValue[i-13..i]
     curSet = new Set()
     foundSignal = true
     for char in cur
