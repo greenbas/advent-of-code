@@ -13,10 +13,12 @@ document.addEventListener("load",() ->
 window.toOutput = (str) -> 
   output.innerText = JSON.stringify(str)
 
-window.processDirectory = (acc,cur) ->
+window.processDirectory = (availSpace) -> (acc,cur) ->
   if cur.constructor.name isnt 'Directory'
     return acc
-  return acc.concat(cur).concat(cur.children.reduce(processDirectory,[]))
+  if (cur.size + availSpace) < NEEDED_SPACE
+    return acc
+  return acc.concat(cur).concat(cur.children.reduce(processDirectory(availSpace),[]))
 
 window.main = () ->
   console.clear()
@@ -31,14 +33,11 @@ window.main = () ->
 
   curSpace = TOTAL_SPACE - terminal.curDir.size
   
-  allDirs = Object.values(terminal.dirs).reduce(processDirectory,[]).sort((a,b) -> b.size - a.size)
+  allDirs = Object.values(terminal.dirs).reduce(processDirectory(curSpace),[]).sort((a,b) -> a.size - b.size)
 
-  console.log curSpace
-  console.log allDirs
-  i = 0;
-  while (allDirs[i + 1].size + curSpace) > NEEDED_SPACE
-    i++
-  toOutput allDirs[i].size
+  toOutput allDirs[0].size
+  
+  
 
 
     
