@@ -1,4 +1,10 @@
+#@ts-check 
+
 import {curry$} from './modules/lsutils.coffee'
+
+import {treeSpan,rowSpan,attributeQuery} from "./modules/domutils.coffee"
+
+import Tree from "./modules/treeWrapper.coffee"
 
 title = 'Advent of code'
 
@@ -7,16 +13,14 @@ document.addEventListener("load",() ->
   window.output = document.getElementById("output")
 )
 
+###* 
+ * @param {String} str
+ * @returns {void}
+###
 window.toOutput = (str) -> 
   output.innerText = JSON.stringify(str)
 
-window.inputProc = () ->
-  rows = input.value.split('\n')
-  trees = rows[1...rows.length-1].map (cur,xPos) ->
-    cur = cur.split("")[1...cur.length-1].map (cur,yPos) ->
-      {height:+cur, xPos: xPos+1, yPos: yPos+1,visibility: 0} 
-  forest = input.value.split('\n')
-  {trees: trees.flat(),forest}
+
 
 window.visibleRow = curry$ (tree,line) -> 
   sum = 0
@@ -31,39 +35,78 @@ window.visibleRow = curry$ (tree,line) ->
 window.moveDir = curry$ (forest,tree,x,y) -> 
   [Symbol.iterator]: () ->
     ptr = [tree.yPos+y,tree.xPos+x]
-    while (forest[ptr[0]]? and forest[ptr[0]][ptr[1]]?)
-      yield Number forest[ptr[0]][ptr[1]]
+    while (forest.querySelector("[rowidx='#{ptr[0]}'] [colidx='#{ptr[1]}']"))
+      yield Tree(forest.querySelector("[rowidx='#{ptr[0]}'] [colidx='#{ptr[1]}']")).height
       ptr[0] += y
       ptr[1] += x
     
 
-window.isVisible = curry$ (forest,tree) -> 
-    debugger
-    forestTraverse = moveDir(forest,tree)
-    treeEast =  [...forestTraverse(1,0)]
-    treeWest =  [...forestTraverse(-1,0)]
-    treeNorth = [...forestTraverse(0,-1)]
-    treeSouth = [...forestTraverse(0,1)]
-    rowCheck = visibleRow(tree)
-    vecs = [treeEast,treeNorth,treeSouth,treeWest]
-    return vecs.reduce((acc,cur) ->
-      return acc * rowCheck(cur)
-    ,1)
+window.isVisible = curry$ (forest,treeElement) -> 
+    tree = Tree treeElement
+
+    treeEast =  tree.eastNeighbours
+    treeWest =  tree.westNeighbours
+    treeNorth = tree.northNeighbours
+    treeSouth = tree.southNeighbours
+    console.log(treeEast,treeWest,treeNorth,treeSouth)
+    
+
 
 
 
 window.main = () ->
-  {forest,trees} = inputProc()
-  outerTreesRows = forest[0].length*2
-  outerTreesSides = forest[1...forest.length-1].length*2
-  visibilityCheck = isVisible(forest)
-  trees.forEach((cur) ->
-    cur.visibility = visibilityCheck(cur)
-  )
+  console.clear()
+  `const forestData = document.createElement('pre')`
+  rows = input.value.split('\n').map((row,rowidx) -> 
+    row = row.split("").reduce(treeSpan,"")
+    rowSpan(rowidx,row)
+  ).join("\n")
+  forestData.innerHTML = rows
+  document.getElementById("data").appendChild forestData
+  `const NUM_ROWS = forestData.querySelectorAll(".row").length`
+  `const NUM_COLS = forestData.querySelectorAll("[rowidx='0'] .tree").length`
+  console.dir({NUM_ROWS,NUM_COLS})
+
+  do -> 
+    edges = 
+      document.querySelectorAll [attributeQuery("rowidx", 0, ".tree")
+        attributeQuery("rowidx",NUM_ROWS - 1,".tree")
+        attributeQuery("colidx",0)
+        attributeQuery("colidx",NUM_COLS - 1)].join(', ')
+    [...edges].forEach (cur) ->
+      cur.classList.add("edge")
+
+  checkTree = Tree(forestData.innerText.split('\n'))
   
-  toOutput trees.reduce((acc,cur) ->
-    return Math.max(cur.visibility,acc)
-  ,0)
+  ###
+  console.log [...forestData.querySelectorAll(".tree:not(.edge)")].forEach(((cur) -> 
+    debugger
+    cur = checkTree(cur)
+    if cur.isVisible
+      cur.element.style.color = "green" 
+  ))
+  ###
+  
+  
+  toOutput [...forestData.querySelectorAll(".tree:not(.edge)")].reduce(((acc,cur) -> 
+    debugger
+    cur = checkTree(cur).isVisible
+    return acc + (if cur then 1 else 0)
+  ),forestData.querySelectorAll(".edge").length )
+  ###
+
+      
+
+  
+
+
+  
+
+   
+  
+  
+  
+  
  
   
   
