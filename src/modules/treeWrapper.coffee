@@ -76,6 +76,11 @@ export default curry$ Tree = (forestData,element) ->
     get: () -> 
         views = [res.westView,res.eastView,res.northView,res.southView]
         return !views.reduce(((acc,cur) -> acc and cur.isBlocked),true)
+
+  attribute 'visibilityScore',
+    get: () -> 
+        views = [res.westView,res.eastView,res.northView,res.southView]
+        return views.reduce(((acc,cur) -> acc * cur.viewLength),1)
         
 
 

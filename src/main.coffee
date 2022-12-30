@@ -89,10 +89,8 @@ window.main = () ->
   
   
   toOutput [...forestData.querySelectorAll(".tree:not(.edge)")].reduce(((acc,cur) -> 
-    debugger
-    cur = checkTree(cur).isVisible
-    return acc + (if cur then 1 else 0)
-  ),forestData.querySelectorAll(".edge").length )
+    return Math.max(acc,checkTree(cur).visibilityScore)
+  ),-1 )
   ###
 
       
